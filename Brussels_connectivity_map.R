@@ -137,7 +137,7 @@ bbox <- tribble(
 
 # plot the map
 data_for_map %>% 
-  filter(capitals == "Brussels") %>%
+  # filter(capitals == "Brussels") %>%
   st_transform(crs = st_crs(3035)) %>% 
 ggplot(group = capitals, fill = diff) +
   geom_sf(european_union_map, mapping = aes(fill = NA))+
