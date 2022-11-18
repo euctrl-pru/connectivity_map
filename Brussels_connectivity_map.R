@@ -10,11 +10,6 @@ library(ggplot2)
 library(pruatlas)
 library(scales)
 
-
-# library(tidyverse)
-# library(plotly)
-# library(ggbreak) 
-
 ipairs33 <- read_csv(here("data", "ipairs33_v3_0_withC_2022Q3.csv"))
 country_code <- read_csv2(here("data", "country_codes.csv")) %>%
   select(country_name, country_iso2_code)
@@ -48,8 +43,6 @@ ipairs_nuts <- ipairs33 %>%
   group_by(rto) %>%
   summarise(value = mean(allFlights)) %>%
   mutate(rfrom = "AVG_NUTS")
-
-
 
 ## add capitals name to nuts3 ----
 df_capitals <- tribble(
@@ -86,35 +79,9 @@ ipair <- ipair_capitals %>%
 # plot world map ----
 world_map <- ne_countries(scale = 50, returnclass = 'sf')
 
-# select European union countries
-european_union <- c(
-  "Austria",
-  "Belgium", "Bulgaria",
-  "Croatia", "Cyprus", "Czech Rep.",
-  "Denmark",
-  "Estonia",
-  "Finland", "France",
-  "Germany", "Greece",
-  "Hungary",
-  "Ireland", "Italy",
-  "Latvia",
-  "Lithuania", "Luxembourg",
-  "Malta",
-  "Netherlands",
-  "Poland", "Portugal",
-  "Romania",
-  "Slovakia", "Slovenia", "Spain", "Sweden",
-  "United Kingdom")
-
-# filter out non European countries from the map
-# european_union_map <- world_map %>% 
-#   filter(continent == "Europe" | geounit %in% c("Cyprus", "Turkey"))
-# 
-# european_union_map_cropped <- european_union_map
-european_union_map_cropped <- world_map
 
 # add flight choice data
-data_for_map <- european_union_map_cropped %>% 
+data_for_map <- world_map %>% 
   left_join(ipair, by = c("iso_a2" = "rto")) %>%
   filter(capitals %in% c("London", "Brussels", "Sofya")) %>% 
   st_transform(crs = st_crs(3035))
