@@ -1,5 +1,4 @@
-#import libraries
-
+# map of connectivity for data snapshot
 library(here)
 library(readr)
 library(dplyr)
@@ -12,9 +11,9 @@ library(pruatlas)
 library(scales)
 
 
-library(tidyverse)
-library(plotly)
-library(ggbreak) 
+# library(tidyverse)
+# library(plotly)
+# library(ggbreak) 
 
 ipairs33 <- read_csv(here("data", "ipairs33_v3_0_withC_2022Q3.csv"))
 country_code <- read_csv2(here("data", "country_codes.csv")) %>%
@@ -108,13 +107,10 @@ european_union <- c(
   "United Kingdom")
 
 # filter out non European countries from the map
-european_union_map <- world_map %>% 
-  filter(continent == "Europe" | geounit %in% c("Cyprus", "Turkey"))
-
-# crop the map to only visualize Europe
-# bbox_europe <- st_bbox(c(xmin = -10, ymin = 20, xmax = 50, ymax = 80),
-#                        crs = st_crs(european_union_map))
-european_union_map_cropped <- european_union_map
+# european_union_map <- world_map %>% 
+#   filter(continent == "Europe" | geounit %in% c("Cyprus", "Turkey"))
+# 
+# european_union_map_cropped <- european_union_map
 european_union_map_cropped <- world_map
 
 # add flight choice data
@@ -123,32 +119,44 @@ data_for_map <- european_union_map_cropped %>%
   filter(capitals %in% c("London", "Brussels", "Sofya")) %>% 
   st_transform(crs = st_crs(3035))
 
-# coord_sf(xlim = c(-13,35), ylim = c(33,73), expand = FALSE)+
+# NOTE: black magic
 bbox <- tribble(
-  ~lon,   ~lat,
-  -7, 35,
-   56, 63
-) %>% 
+  ~lon, ~lat,
+    -7, 35,
+    56, 63
+  ) %>% 
   st_as_sf(coords = c("lon", "lat"), 
            crs = 4326) %>% 
   st_transform(crs = st_crs(3035)) %>% 
   st_bbox() 
 
 
+graticule <- st_graticule(crs = st_crs(3035))
+colour_backgroud <- "#f5f5f2"
+colour_sea       <- "#D8F4FF"
+colour_land      <- "grey89"
+colour_border    <- "#A9A9A9"
+colour_graticule <- "#D3D3D3"
+border_size      <- 0.2
+
+
 # plot the map
 data_for_map %>% 
-  # filter(capitals == "Brussels") %>%
-  st_transform(crs = st_crs(3035)) %>% 
-ggplot(group = capitals, fill = diff) +
-  geom_sf(european_union_map, mapping = aes(fill = NA))+
-  geom_sf(mapping = aes(fill = (diff),group=as.factor(capitals))) +
+  # filter(capitals == "Brussels") %>% # NOTE: for testing
+  ggplot(group = capitals, fill = diff) +
+  # fill the world with water...
+  geom_sf(data = pruatlas::sphere_laea, fill = colour_sea) +
+  # ... plot all the countries and fill with land...
+  geom_sf(data = pruatlas::countries50m,
+          fill   = colour_land,
+          colour = colour_border,
+          size = border_size) +
+  # ... plot the graticule, just to know where is what ...
+  geom_sf(data = graticule,    colour = colour_graticule) +
+  # ... and now the real stuff, i.e. the choropleth  ...
+  geom_sf(mapping = aes(fill = diff, group=as.factor(capitals))) +
+  # ... zoom and clip on the area of interest ...
   coord_sf(xlim = bbox[c(1, 3)], ylim = bbox[c(2, 4)]) +
-  # coord_sf(xlim = c(-13,35), ylim = c(33,73), expand = FALSE)+
-  # scale_fill_gradient(
-  #   name = "Difference in # flights",
-  #   low = "#FF0000FF",
-  #   high = "#FFFF00FF",
-  #   na.value = "grey50") +
   scale_fill_viridis_b(
     option     = "A",
     direction  = -1,
@@ -158,6 +166,10 @@ ggplot(group = capitals, fill = diff) +
     na.value   = "#eeeeee",
     guide      = "colourbar"
   ) +
+  labs(
+    title = "A well designed title",
+    subtitle = "some details that are clearing the meaning of the plot"
+    ) +
   theme_map() +
   theme(plot.title.position = "plot",
         legend.position="bottom",
@@ -174,5 +186,5 @@ ggplot(group = capitals, fill = diff) +
         legend.key.height= unit(0.5, 'cm'),
         # Left margin
         legend.key.width= unit(0.5, 'cm')) + 
-  facet_wrap(capitals ~ ., nrow = 1, ncol = 4)
+  facet_wrap(capitals ~ ., nrow = 1, ncol = 3)
 
