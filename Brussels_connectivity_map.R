@@ -10,6 +10,9 @@ library(ggplot2)
 library(pruatlas)
 library(scales)
 
+library(ggtext)
+
+
 ipairs33 <- read_csv(here("data", "ipairs33_v3_0_withC_2022Q3.csv"))
 country_code <- read_csv2(here("data", "country_codes.csv")) %>%
   select(country_name, country_iso2_code)
@@ -104,8 +107,12 @@ colour_sea       <- "#D8F4FF"
 colour_land      <- "grey89"
 colour_border    <- "#A9A9A9"
 colour_graticule <- "#D3D3D3"
-border_size      <- 0.2
+border_size      <- 0.1
 
+# breaks <- c(-6, -2, 0, 2, 6, 10)
+# breaks <- c(-4, -1, 1, 4, 10)
+# breaks <- c(-6, -2, 0, 2, 6, 10, 20)
+breaks <- c(-4, -2, 0, 2, 4, 10)
 
 # plot the map
 data_for_map %>% 
@@ -124,34 +131,50 @@ data_for_map %>%
   geom_sf(mapping = aes(fill = diff, group=as.factor(capitals))) +
   # ... zoom and clip on the area of interest ...
   coord_sf(xlim = bbox[c(1, 3)], ylim = bbox[c(2, 4)]) +
-  scale_fill_viridis_b(
-    option     = "A",
-    direction  = -1,
+  # scale_fill_distiller(type = "div", palette = "RdBu") +
+  scale_fill_fermenter(
     name       = "flights choice compared to European average",
-    breaks     = c(-6, -2, 0, 2, 6, 10),
-    trans      = pseudo_log_trans(sigma = 2),
-    na.value   = "#eeeeee",
-    guide      = "colourbar"
-  ) +
+    # name       = NULL,
+    n.breaks = length(breaks),
+    type = "div",
+    palette = "RdBu",
+    breaks = breaks) +
+  # scale_fill_viridis_b(
+  #   option     = "A",
+  #   direction  = -1,
+  #   name       = "flights choice compared to European average",
+  #   breaks     = breaks,
+  #   trans      = pseudo_log_trans(sigma = 2),
+  #   na.value   = "#eeeeee",
+  #   guide      = "colourbar"
+  # ) +
   labs(
-    title = "A well designed title",
-    subtitle = "some details that are clearing the meaning of the plot"
+    # title = "A well designed title",
+    # subtitle = "flights choice compared to European average"
     ) +
   theme_map() +
-  theme(plot.title.position = "plot",
-        legend.position="bottom",
-        plot.margin = margin(
-          # Top margin
-          t = 0,
-          # Top margin
-          r = 1,
-          # Top margin
-          b = 0,
-          # Left margin
-          l = 1),
-        legend.title = element_text(size=10),
-        legend.key.height= unit(0.5, 'cm'),
-        # Left margin
-        legend.key.width= unit(0.5, 'cm')) + 
-  facet_wrap(capitals ~ ., nrow = 1, ncol = 3)
-
+  facet_grid(cols = vars(capitals)) +
+  theme(
+    plot.title.position = "plot",
+    panel.spacing = unit(0.2, "lines"),
+    plot.margin = margin(
+      # Top margin
+      t = 1,
+      # Top margin
+      r = 2,
+      # Top margin
+      b = 1,
+      # Left margin
+      l = 2
+    ),
+    # legend.position = "bottom",
+    legend.position = c(0.337, 0.85),
+    legend.direction = "horizontal",
+    legend.background = element_rect(
+      fill = "transparent", 
+      colour = "grey50",
+      size = 0.3
+    ),
+    legend.title = element_textbox(fill = "white", padding = ggplot2::margin(1, 1, 1, 1)),
+    strip.text.x = element_text(size = 15),
+    NULL)
