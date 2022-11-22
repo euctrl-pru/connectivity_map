@@ -4,6 +4,7 @@ library(readr)
 library(dplyr)
 library(forcats)
 library(sf)
+library(udunits2)
 library(rnaturalearth)
 library(rnaturalearthdata)
 library(ggplot2)
@@ -54,7 +55,7 @@ df_capitals <- tribble(
   "NL329",  "Amsterdam",
   "BE100",  "Brussels",
   "DE300",  "Berlin",
-  "BG412",  "Sofya",
+  "BG412",  "Sofia",
   "FR101",  "Paris",
   "IE061",  "Dublin",
   "MT001",  "Malta"
@@ -86,7 +87,7 @@ world_map <- ne_countries(scale = 50, returnclass = 'sf')
 # add flight choice data
 data_for_map <- world_map %>% 
   left_join(ipair, by = c("iso_a2" = "rto")) %>%
-  filter(capitals %in% c("London", "Brussels", "Sofya")) %>% 
+  filter(capitals %in% c("London", "Brussels", "Sofia")) %>% 
   st_transform(crs = st_crs(3035))
 
 # NOTE: black magic
