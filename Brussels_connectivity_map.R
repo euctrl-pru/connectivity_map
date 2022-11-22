@@ -113,7 +113,7 @@ border_size      <- 0.1
 # breaks <- c(-6, -2, 0, 2, 6, 10)
 # breaks <- c(-4, -1, 1, 4, 10)
 # breaks <- c(-6, -2, 0, 2, 6, 10, 20)
-breaks <- c(-4, -2, 0, 2, 4, 10)
+breaks <- c(-6,-4, -2, 0, 2, 4, 10)
 
 # plot the map
 data_for_map %>% 
@@ -139,7 +139,8 @@ data_for_map %>%
     n.breaks = length(breaks),
     type = "div",
     palette = "RdBu",
-    breaks = breaks) +
+    breaks = breaks,
+    direction = 1) +
   # scale_fill_viridis_b(
   #   option     = "A",
   #   direction  = -1,
