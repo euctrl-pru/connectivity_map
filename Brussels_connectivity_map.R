@@ -51,11 +51,11 @@ ipairs_nuts <- ipairs33 %>%
 ## add capitals name to nuts3 ----
 df_capitals <- tribble(
    ~rfrom, ~capitals,
-  "UKI31",  "London",
+  "UKI31",  "from London",
   "NL329",  "Amsterdam",
-  "BE100",  "Brussels",
+  "BE100",  "from Brussels",
   "DE300",  "Berlin",
-  "BG412",  "Sofia",
+  "BG412",  "from Sofia",
   "FR101",  "Paris",
   "IE061",  "Dublin",
   "MT001",  "Malta"
@@ -87,7 +87,7 @@ world_map <- ne_countries(scale = 50, returnclass = 'sf')
 # add flight choice data
 data_for_map <- world_map %>% 
   left_join(ipair, by = c("iso_a2" = "rto")) %>%
-  filter(capitals %in% c("London", "Brussels", "Sofia")) %>% 
+  filter(capitals %in% c("from London", "from Brussels", "from Sofia")) %>% 
   st_transform(crs = st_crs(3035))
 
 # NOTE: black magic
@@ -119,7 +119,7 @@ breaks <- c(0,1,2,3,4,5,10,30)
 # plot the map
 data_for_map %>% 
   # filter(capitals == "Brussels") %>% # NOTE: for testing
-  ggplot(group = capitals, fill = value) +
+  ggplot(group = capitals, fill = allFlights) +
   # fill the world with water...
   geom_sf(data = pruatlas::sphere_laea, fill = colour_sea) +
   # ... plot all the countries and fill with land...
@@ -130,18 +130,20 @@ data_for_map %>%
   # ... plot the graticule, just to know where is what ...
   geom_sf(data = graticule,    colour = colour_graticule) +
   # ... and now the real stuff, i.e. the choropleth  ...
-  geom_sf(mapping = aes(fill = value, group=as.factor(capitals))) +
+  geom_sf(mapping = aes(fill = allFlights, group=as.factor(capitals))) +
   # ... zoom and clip on the area of interest ...
   coord_sf(xlim = bbox[c(1, 3)], ylim = bbox[c(2, 4)]) +
   # scale_fill_distiller(type = "div", palette = "RdBu") +
   scale_fill_fermenter(
     name       = "Flights Choice (/Day)",
     # name       = NULL,
+    guide=guide_colorsteps(title.position = "top"),
     n.breaks = length(breaks),
     type = "div",
     palette = "Blues",
     breaks = breaks,
-    direction = 1) +
+    direction = 1
+    ) +
   # scale_fill_viridis_b(
   #   option     = "A",
   #   direction  = -1,
@@ -170,14 +172,16 @@ data_for_map %>%
       # Left margin
       l = 2
     ),
-    # legend.position = "bottom",
-    legend.position = c(0.337, 0.85),
+    legend.position = "top",
+    # legend.position = c(0.337, 0.85),
     legend.direction = "horizontal",
+    legend.justification = "center",
     legend.background = element_rect(
-      fill = "transparent", 
-      colour = "grey50",
-      size = 0.3
+      fill = "grey89", 
+      colour = "grey89",
+      size = 1
     ),
-    legend.title = element_textbox(fill = "white", padding = ggplot2::margin(1, 1, 1, 1)),
+    legend.title = element_textbox(fill = "grey89", padding = ggplot2::margin(1, 1, 1, 1),size=11),
     strip.text.x = element_text(size = 15),
     NULL)
+  
