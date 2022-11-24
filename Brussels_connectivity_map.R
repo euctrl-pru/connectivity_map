@@ -113,12 +113,13 @@ border_size      <- 0.1
 # breaks <- c(-6, -2, 0, 2, 6, 10)
 # breaks <- c(-4, -1, 1, 4, 10)
 # breaks <- c(-6, -2, 0, 2, 6, 10, 20)
-breaks <- c(-6,-4, -2, 0, 2, 4, 10)
+# breaks <- c(-6,-4, -2, 0, 2, 4, 10)#used for centered to zero plot
+breaks <- c(0,1,2,3,4,5,10,30)
 
 # plot the map
 data_for_map %>% 
   # filter(capitals == "Brussels") %>% # NOTE: for testing
-  ggplot(group = capitals, fill = diff) +
+  ggplot(group = capitals, fill = value) +
   # fill the world with water...
   geom_sf(data = pruatlas::sphere_laea, fill = colour_sea) +
   # ... plot all the countries and fill with land...
@@ -129,7 +130,7 @@ data_for_map %>%
   # ... plot the graticule, just to know where is what ...
   geom_sf(data = graticule,    colour = colour_graticule) +
   # ... and now the real stuff, i.e. the choropleth  ...
-  geom_sf(mapping = aes(fill = diff, group=as.factor(capitals))) +
+  geom_sf(mapping = aes(fill = value, group=as.factor(capitals))) +
   # ... zoom and clip on the area of interest ...
   coord_sf(xlim = bbox[c(1, 3)], ylim = bbox[c(2, 4)]) +
   # scale_fill_distiller(type = "div", palette = "RdBu") +
@@ -138,7 +139,7 @@ data_for_map %>%
     # name       = NULL,
     n.breaks = length(breaks),
     type = "div",
-    palette = "RdBu",
+    palette = "Blues",
     breaks = breaks,
     direction = 1) +
   # scale_fill_viridis_b(
