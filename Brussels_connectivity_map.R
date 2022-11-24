@@ -135,7 +135,7 @@ data_for_map %>%
   coord_sf(xlim = bbox[c(1, 3)], ylim = bbox[c(2, 4)]) +
   # scale_fill_distiller(type = "div", palette = "RdBu") +
   scale_fill_fermenter(
-    name       = "flights choice compared to European average",
+    name       = "Flights Choice (/Day)",
     # name       = NULL,
     n.breaks = length(breaks),
     type = "div",
