@@ -3,8 +3,8 @@ library(here)
 library(readr)
 library(dplyr)
 library(forcats)
-library(sf)
 library(udunits2)
+library(sf)
 library(rnaturalearth)
 library(rnaturalearthdata)
 library(ggplot2)
@@ -65,7 +65,7 @@ df_capitals <- tribble(
 ipair <- ipair_capitals %>%
   left_join(ipairs_nuts, by = "rto") %>%
   mutate(diff = allFlights-value) %>%
-  select(rfrom.x, rto, diff) %>%
+  # select(rfrom.x, rto, diff) %>%
   left_join(country_code, by = c("rto" = "country_iso2_code")) %>%
   arrange(desc(diff)) %>%
   mutate(
