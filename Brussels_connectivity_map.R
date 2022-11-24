@@ -172,6 +172,7 @@ data_for_map %>%
       # Left margin
       l = 2
     ),
+    legend.text=element_text(size=8),
     legend.position = "top",
     # legend.position = c(0.337, 0.85),
     legend.direction = "horizontal",
