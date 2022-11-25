@@ -63,6 +63,24 @@ df_capitals <- tribble(
   "MT001",  "Malta"
 )
 
+points <- df_capitals %>%
+  left_join(centroids %>% 
+              dplyr::select(NUTS_ID.x,
+                            popLat.x,
+                            popLon.x)%>%
+              distinct(),
+            by=c("rfrom"="NUTS_ID.x"))%>%
+  filter(!is.na(popLon.x))%>%
+  dplyr::select(rfrom,popLat.x,popLon.x)
+
+
+points <-  st_as_sf(points, coords = c("popLon.x","popLat.x"), crs = 4326)%>%
+  st_transform(crs = st_crs(3035))%>%
+  st_coordinates(points)%>%
+  cbind(points)%>%
+  dplyr::select(-popLat.x,-popLon.x)
+
+
 # calculate the difference between flight choices and average value ----
 ipair <- ipair_capitals %>%
   left_join(ipairs_nuts, by = "rto") %>%
@@ -78,12 +96,8 @@ ipair <- ipair_capitals %>%
     country_name = fct_reorder(country_name, diff)
   ) %>%
   left_join(df_capitals, by = c("rfrom.x" = "rfrom"))%>%
-  left_join(centroids %>% 
-              dplyr::select(NUTS_ID.x,
-                            popLat.x,
-                            popLon.x),
-            by=c("rfrom.x"="NUTS_ID.x"))
-
+  left_join(points,
+            by=c("rfrom.x"="rfrom"))
 
 
 
@@ -139,13 +153,11 @@ data_for_map %>%
   geom_sf(data = graticule,    colour = colour_graticule) +
   # ... and now the real stuff, i.e. the choropleth  ...
   geom_sf(mapping = aes(fill = allFlights, group=as.factor(capitals))) +
+  #...plot capitals coordinates
+  geom_point(aes(x=X,y=Y,group=as.factor(capitals)),colour="#ff5349",shape=8,size=1)+
   # ... zoom and clip on the area of interest ...
   coord_sf(xlim = bbox[c(1, 3)], ylim = bbox[c(2, 4)]) +
   # scale_fill_distiller(type = "div", palette = "RdBu") +
-  geom_point(data_for_map %>%
-               dplyr::select(country_name)%>%
-               filter(country_name %in% c("Belgium","Bulgaria","United Kingdom"))%>%
-               distinct(),mapping=aes(fill=geometry))+
   scale_fill_fermenter(
     name       = "Flights Choice (/Day)",
     # name       = NULL,
@@ -159,11 +171,11 @@ data_for_map %>%
   # scale_fill_viridis_b(
   #   option     = "A",
   #   direction  = -1,
-  #   name       = "flights choice compared to European average",
+  #   name       = "Flights Choice (/Day) ",
   #   breaks     = breaks,
   #   trans      = pseudo_log_trans(sigma = 2),
   #   na.value   = "#eeeeee",
-  #   guide      = "colourbar"
+  #   guide=guide_colorsteps(title.position = "top")
   # ) +
   labs(
     # title = "A well designed title",
@@ -190,11 +202,12 @@ data_for_map %>%
     legend.direction = "horizontal",
     legend.justification = "center",
     legend.background = element_rect(
+      # fill = "grey89", 
       fill = "grey89", 
       colour = "grey89",
       size = 1
     ),
-    legend.title = element_textbox(fill = "grey89", padding = ggplot2::margin(1, 1, 1, 1),size=11),
+    legend.title = element_textbox(fill = "grey89", padding = ggplot2::margin(1, 1, 1, 1),size=8),
     strip.text.x = element_text(size = 15),
     NULL)
-  
+
