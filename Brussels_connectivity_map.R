@@ -17,6 +17,8 @@ library(ggtext)
 ipairs33 <- read_csv(here("data", "ipairs33_v3_0_withC_2022Q3.csv"))
 country_code <- read_csv2(here("data", "country_codes.csv")) %>%
   select(country_name, country_iso2_code)
+centroids <- read_csv(here("data","CtoC_330gcd_drive_interim.csv"))
+
 
 # filter nuts3-nuts0 flight choice from intra-eu connectivity ----
 ipair_capitals <- ipairs33 %>%
@@ -75,7 +77,13 @@ ipair <- ipair_capitals %>%
       TRUE        ~ country_name),
     country_name = fct_reorder(country_name, diff)
   ) %>%
-  left_join(df_capitals, by = c("rfrom.x" = "rfrom"))
+  left_join(df_capitals, by = c("rfrom.x" = "rfrom"))%>%
+  left_join(centroids %>% 
+              dplyr::select(NUTS_ID.x,
+                            popLat.x,
+                            popLon.x),
+            by=c("rfrom.x"="NUTS_ID.x"))
+
 
 
 
@@ -134,6 +142,10 @@ data_for_map %>%
   # ... zoom and clip on the area of interest ...
   coord_sf(xlim = bbox[c(1, 3)], ylim = bbox[c(2, 4)]) +
   # scale_fill_distiller(type = "div", palette = "RdBu") +
+  geom_point(data_for_map %>%
+               dplyr::select(country_name)%>%
+               filter(country_name %in% c("Belgium","Bulgaria","United Kingdom"))%>%
+               distinct(),mapping=aes(fill=geometry))+
   scale_fill_fermenter(
     name       = "Flights Choice (/Day)",
     # name       = NULL,
