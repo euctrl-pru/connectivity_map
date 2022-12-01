@@ -38,6 +38,26 @@ ipair_capitals <- ipairs33 %>%
       "FR101",
       "IE061",
       "MT001",
+      "AT130",
+      "CY000",
+      "CZ010",
+      "DK011",
+      "EE006",
+      "ES300",
+      "FI1B1",
+      "EL305",
+      "HR401",
+      "HU110",
+      "ITI43",
+      "LT00A",
+      "LU000",
+      "LV006",
+      "PL127",
+      "PT170",
+      "RO321",
+      "SE110",
+      "SI041",
+      "SK010",
       NULL)) %>% 
   dplyr::select(rfrom, rto, allFlights)
 
@@ -53,14 +73,36 @@ ipairs_nuts <- ipairs33 %>%
 ## add capitals name to nuts3 ----
 df_capitals <- tribble(
    ~rfrom, ~capitals,
-  "UKI31",  "from London",
+  "UKI31",  "London",
   "NL329",  "Amsterdam",
-  "BE100",  "from Brussels",
+  "BE100",  "Brussels",
   "DE300",  "Berlin",
-  "BG412",  "from Sofia",
+  "BG412",  "Sofia",
   "FR101",  "Paris",
   "IE061",  "Dublin",
-  "MT001",  "Malta"
+  "MT001",  "Malta",
+  "AT130",  "Vienna",
+  "CY000", "Nicosia",
+  "CZ010","Prague",
+  "DK011", "Copenhague",
+  "EE006", "Tallinn",
+  "ES300", "Madrid",
+  "FI1B1", "Helsinki",
+  "EL305", "Athens",
+  "HR401", "Zagreb",
+  "HU110", "Budapest",
+  "ITI43", "Rome",
+  "LT00A", "Vilnius",
+  "LU000", "Luxembourg",
+  "LV006", "Riga",
+  "PL127", "Warsaw",
+  "PT170", "Lisbon",
+  "RO321","Bucharest",
+  "SE110", "Stockholm",
+  "SI041","Ljubljana",
+  "SK010","Bratislava"
+  
+  
 )
 
 points <- df_capitals %>%
@@ -109,7 +151,7 @@ world_map <- ne_countries(scale = 50, returnclass = 'sf')
 # add flight choice data
 data_for_map <- world_map %>% 
   left_join(ipair, by = c("iso_a2" = "rto")) %>%
-  filter(capitals %in% c("from London", "from Brussels", "from Sofia")) %>% 
+  filter(capitals %in% c("London", "Brussels", "Sofia")) %>% 
   st_transform(crs = st_crs(3035))
 
 # NOTE: black magic
@@ -135,13 +177,13 @@ border_size      <- 0.1
 # breaks <- c(-6, -2, 0, 2, 6, 10)
 # breaks <- c(-4, -1, 1, 4, 10)
 # breaks <- c(-6, -2, 0, 2, 6, 10, 20)
-# breaks <- c(-6,-4, -2, 0, 2, 4, 10)#used for centered to zero plot
-breaks <- c(0,1,2,3,4,5,10,30)
+breaks <- c(-6,-4, -2, 0, 2, 4, 10)#used for centered to zero plot
+# breaks <- c(0,1,2,3,4,5,10,30)
 
 # plot the map
 data_for_map %>% 
   # filter(capitals == "Brussels") %>% # NOTE: for testing
-  ggplot(group = capitals, fill = allFlights) +
+  ggplot(group = capitals, fill = diff) +
   # fill the world with water...
   geom_sf(data = pruatlas::sphere_laea, fill = colour_sea) +
   # ... plot all the countries and fill with land...
@@ -152,14 +194,14 @@ data_for_map %>%
   # ... plot the graticule, just to know where is what ...
   geom_sf(data = graticule,    colour = colour_graticule) +
   # ... and now the real stuff, i.e. the choropleth  ...
-  geom_sf(mapping = aes(fill = allFlights, group=as.factor(capitals))) +
+  geom_sf(mapping = aes(fill = diff, group=as.factor(capitals))) +
   #...plot capitals coordinates
   geom_point(aes(x=X,y=Y,group=as.factor(capitals)),colour="#ff5349",shape=8,size=1)+
   # ... zoom and clip on the area of interest ...
   coord_sf(xlim = bbox[c(1, 3)], ylim = bbox[c(2, 4)]) +
   # scale_fill_distiller(type = "div", palette = "RdBu") +
   scale_fill_fermenter(
-    name       = "Flights Choice (/Day)",
+    name       = "flights choice compared to European average",
     # name       = NULL,
     guide=guide_colorsteps(title.position = "top"),
     n.breaks = length(breaks),
