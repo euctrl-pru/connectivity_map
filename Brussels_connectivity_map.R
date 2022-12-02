@@ -10,6 +10,7 @@ library(rnaturalearthdata)
 library(ggplot2)
 library(pruatlas)
 library(scales)
+library(xlsx)
 
 library(ggtext)
 
@@ -201,7 +202,7 @@ data_for_map %>%
   coord_sf(xlim = bbox[c(1, 3)], ylim = bbox[c(2, 4)]) +
   # scale_fill_distiller(type = "div", palette = "RdBu") +
   scale_fill_fermenter(
-    name       = "flights choice compared to European average",
+    name       = "flights choice compared to European average" ,
     # name       = NULL,
     guide=guide_colorsteps(title.position = "top"),
     n.breaks = length(breaks),
@@ -221,12 +222,14 @@ data_for_map %>%
   #   guide=guide_colorsteps(title.position = "top")
   # ) +
   labs(
-    # title = "A well designed title",
+    title = "Aviation connectivity from three European capitals",
     # subtitle = "flights choice compared to European average"
+    caption="Period: 04/09/22-10/09/22"
     ) +
   theme_map() +
   facet_grid(cols = vars(capitals)) +
   theme(
+    plot.title = element_text(size=18,hjust = 0.5,face = "bold"),
     plot.title.position = "plot",
     panel.spacing = unit(0.2, "lines"),
     plot.margin = margin(
@@ -239,9 +242,9 @@ data_for_map %>%
       # Left margin
       l = 2
     ),
-    legend.text=element_text(size=8),
+    legend.text=element_text(size=10),
     # legend.position = "top",
-    legend.position = c(0.337, 0.85),
+    legend.position = c(0.337, 0.77),
     legend.direction = "horizontal",
     # legend.justification = "center",
     legend.background = element_rect(
@@ -249,16 +252,17 @@ data_for_map %>%
       # fill = "grey89", 
       colour = "grey89",
       # size = 1
-      size=0.3,
+      size=1,
     ),
-    legend.title = element_textbox(fill = "transparent", padding = ggplot2::margin(1, 1, 1, 1),size=8),
+    legend.title = element_textbox(fill = "grey89", padding = ggplot2::margin(1, 1, 1, 1),size=11),
     strip.text.x = element_text(size = 15),
     NULL)
 
+#save the data in an excel worksheet
   world_map %>% 
   st_drop_geometry()%>%
   right_join(ipair, by = c("iso_a2" = "rto")) %>% 
   rename(rto = iso_a2)%>%
   dplyr::select(capitals,rto,diff,allFlights)%>%
-  write_csv("../../FlightsChoice_from_capitals.csv")
+  write_csv("../../FlightsChoice_from_capitals.xls")
 
